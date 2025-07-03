@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        font: 14px/1.4 sans-serif;
+        margin: 12px;
+        width: 250px;
+      }
+      ul {
+        padding-left: 18px;
+      }
+      li {
+        margin-bottom: 4px;
+      }
+      button {
+        margin-left: 6px;
+      }
+      input[type="text"] {
+        width: 180px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Block a site</h3>
+    <input id="url" type="text" placeholder="e.g. reddit.com" />
+    <button id="add">Add</button>
+
+    <h4>Currently blocked</h4>
+    <ul id="list"></ul>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
