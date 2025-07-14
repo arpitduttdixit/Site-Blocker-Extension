@@ -6,15 +6,18 @@ const RULE_ID_START = 1000;
  * @param {string[]} patterns
  */
 function patternsToRules(patterns) {
-  return patterns.map((pattern, idx) => ({
-    id: RULE_ID_START + idx,
-    priority: 1,
-    action: { type: "block" },
-    condition: {
-      urlFilter: pattern,
-      resourceTypes: ["main_frame", "sub_frame"],
-    },
-  }));
+  return patterns.map((raw, idx) => {
+    const urlFilter = normalize(raw.trim());
+    return {
+      id: RULE_ID_START + idx,
+      priority: 1,
+      action: { type: "block" },
+      condition: {
+        urlFilter,
+        resourceTypes: ["main_frame", "sub_frame"], // covers top-level nav + iframes
+      },
+    };
+  });
 }
 
 /** Load list from storage, build rules on startup */
@@ -22,6 +25,20 @@ chrome.runtime.onInstalled.addListener(async () => {
   const { blocked = [] } = await chrome.storage.sync.get("blocked");
   await refreshRules(blocked);
 });
+
+/**
+ * Naïve “smart” conversion:
+ *  - If the string looks like a bare domain, wrap it with *://*.  … /*
+ *  - Otherwise leave it unchanged (supports advanced URL-filter syntax)
+ */
+function normalize(pattern) {
+  // Matches something like example.com or sub.domain.co.uk
+  const domainRegex = /^[a-z0-9.-]+\.[a-z]{2,}$/i;
+  if (domainRegex.test(pattern)) {
+    return `*://*.${pattern.replace(/^www\./, "")}/*`;
+  }
+  return pattern;
+}
 
 /**
  * Replace ALL dynamic rules with rules matching given patterns.
