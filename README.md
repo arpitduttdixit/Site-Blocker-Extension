@@ -114,4 +114,4 @@ Feel free to open issues or submit pull requests for:
 
 ## 📜 License
 
-MIT © 2025 — Do whatever you want, just don’t blame me if you lock yourself out of the intern
+MIT © 2025 — Do whatever you want, just don’t blame me if you lock yourself out of the internet 😉
