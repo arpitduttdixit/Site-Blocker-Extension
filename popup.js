@@ -15,6 +15,8 @@ const urlInput = document.getElementById("url");
 const addBtn = document.getElementById("add");
 const listUl = document.getElementById("list");
 const quickAddDiv = document.getElementById("quick-adds");
+const quickAddInput = document.getElementById("quick-add-input");
+const quickAddBtn = document.getElementById("quick-add-btn");
 
 /**************************
  * 3. State               *
@@ -92,6 +94,17 @@ async function addPattern(raw) {
   await pushUpdate();
 }
 
+async function addQuickAdd() {
+  const pattern = quickAddInput.value.trim();
+  if (!pattern) return;
+  if (userAdds.some((qa) => qa.pattern === pattern)) {
+    alert("Already exists in quick-adds.");
+    return;
+  }
+  await addUserQuickAdd(quickAddInput.value, pattern);
+  quickAddInput.value = "";
+}
+
 async function removeAt(i) {
   blocked.splice(i, 1);
   await pushUpdate();
@@ -128,5 +141,7 @@ addBtn.addEventListener("click", () => addPattern());
 urlInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") addPattern();
 });
+
+quickAddBtn.addEventListener("click", () => addQuickAdd());
 
 init();
