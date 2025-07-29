@@ -20,6 +20,15 @@
       input[type="text"] {
         width: 180px;
       }
+      .quick-addons {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-top: 8px;
+      }
+      #quick-add-btn {
+        width: 180px;
+      }
     </style>
   </head>
   <body>
@@ -38,6 +47,11 @@
 
     <h4>Currently blocked</h4>
     <ul id="list"></ul>
+
+    <div class="quick-addons">
+      <input id="quick-add-input" type="text" placeholder="enter a quick add" />
+      <button id="quick-add-btn">Add Quick-Add</button>
+    </div>
 
     <script type="module" src="popup.js"></script>
   </body>
