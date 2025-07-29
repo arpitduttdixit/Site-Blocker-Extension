@@ -3,31 +3,178 @@
   <head>
     <meta charset="utf-8" />
     <style>
+      @font-face {
+        font-family: "Anime Ace BB";
+        src: url("./fonts/animeace2_bb_reg.woff2") format("woff2"),
+          url("./fonts/animeace2_bb_reg.woff") format("woff");
+        font-display: swap;
+      }
+
       body {
-        font: 14px/1.4 sans-serif;
+        font-family: "Anime Ace BB", sans-serif;
         margin: 12px;
-        width: 250px;
+        width: 350px;
+        background: #f8f8f8;
+        color: #000;
       }
+
+      h3 {
+        font-family: "Anime Ace BB", sans-serif;
+        font-size: 16px;
+        text-align: center;
+        margin: 0 0 16px 0;
+        padding: 12px;
+        background: white;
+        border: 4px solid black;
+        border-radius: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 4px 4px 0px black;
+      }
+
+      h4 {
+        font-family: "Anime Ace BB", sans-serif;
+        font-size: 14px;
+        text-transform: uppercase;
+        margin: 20px 0 8px 0;
+        letter-spacing: 0.5px;
+      }
+
       ul {
-        padding-left: 18px;
+        padding-left: 0;
+        list-style: none;
       }
+
       li {
-        margin-bottom: 4px;
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        background: white;
+        border: 2px solid black;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 2px 2px 0px black;
+        font-size: 13px;
       }
+
+      li button {
+        margin: 0;
+        padding: 4px 8px;
+        font-size: 11px;
+        background: #ff4444;
+        color: white;
+        border: 2px solid black;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: "Anime Ace BB", sans-serif;
+        text-transform: uppercase;
+        box-shadow: 1px 1px 0px black;
+      }
+
+      li button:hover {
+        background: #ff6666;
+        box-shadow: 2px 2px 0px black;
+        transform: translate(-1px, -1px);
+      }
+
       button {
+        font-family: "Anime Ace BB", sans-serif;
+        padding: 10px 16px;
+        border: 3px solid black;
+        border-radius: 6px;
+        background: white;
+        cursor: pointer;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 2px 2px 0px black;
+        transition: all 0.1s ease;
         margin-left: 6px;
       }
-      input[type="text"] {
-        width: 180px;
+
+      button:hover {
+        background: #f0f0f0;
+        box-shadow: 3px 3px 0px black;
+        transform: translate(-1px, -1px);
       }
+
+      button:active {
+        box-shadow: 1px 1px 0px black;
+        transform: translate(1px, 1px);
+      }
+
+      input[type="text"] {
+        font-family: "Anime Ace BB", sans-serif;
+        width: 180px;
+        padding: 10px;
+        border: 3px solid black;
+        border-radius: 6px;
+        font-size: 13px;
+        background: white;
+        box-shadow: 2px 2px 0px black;
+        outline: none;
+      }
+
+      input[type="text"]:focus {
+        box-shadow: 3px 3px 0px black;
+        transform: translate(-1px, -1px);
+      }
+
       .quick-addons {
         display: flex;
         flex-direction: row;
         align-items: center;
         margin-top: 8px;
       }
+
       #quick-add-btn {
         width: 180px;
+      }
+
+      #quick-add-wrapper {
+        margin: 16px 0;
+      }
+
+      #quick-add-wrapper strong {
+        font-family: "Anime Ace BB", sans-serif;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      #quick-adds {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      #quick-adds button {
+        font-family: "Anime Ace BB", sans-serif;
+        padding: 8px 12px;
+        border: 3px solid black;
+        border-radius: 6px;
+        background: white;
+        cursor: pointer;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 2px 2px 0px black;
+        transition: all 0.1s ease;
+        margin: 0;
+      }
+
+      #quick-adds button:hover {
+        background: #f0f0f0;
+        box-shadow: 3px 3px 0px black;
+        transform: translate(-1px, -1px);
+      }
+
+      #quick-adds button:active {
+        box-shadow: 1px 1px 0px black;
+        transform: translate(1px, 1px);
       }
     </style>
   </head>
