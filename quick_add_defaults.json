@@ -2,5 +2,6 @@
   "*://*.youtube.com/*",
   "*://*.reddit.com/*",
   "*://*.twitter.com/*",
-  "*://*.instagram.com/*"
+  "*://*.instagram.com/*",
+  "*://*.x.com/*"
 ]
