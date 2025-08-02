@@ -2,7 +2,7 @@
 const RULE_ID_START = 1000;
 
 /**
- * Turn an array of strings into DynamicRules (1 per string).
+ * Turn an array of strings (patterns) into DynamicRules (1 per string).
  * @param {string[]} patterns
  */
 function patternsToRules(patterns) {
@@ -23,7 +23,17 @@ function patternsToRules(patterns) {
 /** Load list from storage, build rules on startup */
 chrome.runtime.onInstalled.addListener(async () => {
   const { blocked = [] } = await chrome.storage.sync.get("blocked");
-  await refreshRules(blocked);
+  // Filter out expired items before refreshing rules on install
+  const activeBlocked = blocked.filter(item => typeof item === 'object' && (item.blockUntil === 0 || item.blockUntil > Date.now())).map(item => item.pattern);
+  await refreshRules(activeBlocked);
+});
+
+/** Load list from storage, build rules on startup */
+chrome.runtime.onStartup.addListener(async () => {
+  const { blocked = [] } = await chrome.storage.sync.get("blocked");
+  // Filter out expired items before refreshing rules on startup
+  const activeBlocked = blocked.filter(item => typeof item === 'object' && (item.blockUntil === 0 || item.blockUntil > Date.now())).map(item => item.pattern);
+  await refreshRules(activeBlocked);
 });
 
 /**
