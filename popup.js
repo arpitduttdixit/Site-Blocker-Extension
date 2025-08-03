@@ -191,6 +191,7 @@ async function pushUpdate() {
       .filter((item) => item.blockUntil === 0 || item.blockUntil > Date.now())
       .map((item) => item.pattern),
   });
+  console.log("Block list updated:", blocked);
   await chrome.storage.sync.set({ blocked });
   renderList();
 }
