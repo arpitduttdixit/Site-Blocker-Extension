@@ -43,22 +43,9 @@ async function init() {
   userAdds = quickAdds;
   renderQuickAdds();
   renderList();
-  // Set up an interval to check for expired URLs every minute
-  setInterval(checkExpiredUrls, 60 * 1000);
 }
 
-// Function to check and remove expired URLs
-async function checkExpiredUrls() {
-  const now = Date.now();
-  const initialBlockedCount = blocked.length;
-  blocked = blocked.filter(
-    (item) => item.blockUntil === 0 || item.blockUntil > now
-  );
 
-  if (blocked.length < initialBlockedCount) {
-    await pushUpdate();
-  }
-}
 
 /**************************
  * 5. Rendering helpers   *
@@ -98,6 +85,7 @@ function renderList() {
     const expirySelect = document.createElement("select");
     expirySelect.innerHTML = `
       <option value="0">Set expiry</option>
+      <option value="1">1 min</option>
       <option value="2">2 min</option>
       <option value="15">15 min</option>
       <option value="30">30 min</option>
@@ -112,7 +100,7 @@ function renderList() {
         ? Math.round((item.blockUntil - Date.now()) / (60 * 1000))
         : 0;
     // Find the closest option value for display
-    const closestOption = [0, 2, 15, 30, 45, 60, 120, 300].reduce(
+    const closestOption = [0, 1, 2, 15, 30, 45, 60, 120, 300].reduce(
       (prev, curr) =>
         Math.abs(curr - durationInMinutes) < Math.abs(prev - durationInMinutes)
           ? curr
