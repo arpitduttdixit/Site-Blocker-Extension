@@ -2,7 +2,7 @@
 const RULE_ID_START = 1000;
 
 /**
- * Turn an array of strings into DynamicRules (1 per string).
+ * Turn an array of strings (patterns) into DynamicRules (1 per string).
  * @param {string[]} patterns
  */
 function patternsToRules(patterns) {
@@ -22,8 +22,12 @@ function patternsToRules(patterns) {
 
 /** Load list from storage, build rules on startup */
 chrome.runtime.onInstalled.addListener(async () => {
-  const { blocked = [] } = await chrome.storage.sync.get("blocked");
-  await refreshRules(blocked);
+  await initBackground();
+});
+
+/** Load list from storage, build rules on startup */
+chrome.runtime.onStartup.addListener(async () => {
+  await initBackground();
 });
 
 /**
@@ -54,10 +58,39 @@ async function refreshRules(patterns) {
   });
 }
 
+// Function to check and remove expired URLs
+async function checkExpiredUrls() {
+  const { blocked: b = [] } = await chrome.storage.sync.get("blocked");
+  let blocked = b.map(item => typeof item === 'string' ? { pattern: item, blockUntil: 0 } : item);
+
+  const now = Date.now();
+  const initialBlockedCount = blocked.length;
+  blocked = blocked.filter(
+    (item) => item.blockUntil === 0 || item.blockUntil > now
+  );
+
+  if (blocked.length < initialBlockedCount) {
+    await chrome.storage.sync.set({ blocked });
+    await refreshRules(blocked.map(item => item.pattern));
+  }
+}
+
+async function initBackground() {
+  const { blocked = [] } = await chrome.storage.sync.get("blocked");
+  const activeBlockedPatterns = blocked
+    .filter(
+      (item) =>
+        typeof item === "object" &&
+        (item.blockUntil === 0 || item.blockUntil > Date.now())
+    )
+    .map((item) => item.pattern);
+  await refreshRules(activeBlockedPatterns);
+  setInterval(checkExpiredUrls, 60 * 1000); // Check every minute
+}
+
 /** Listen for messages from the popup to update list */
 chrome.runtime.onMessage.addListener(async (msg, _sender, sendResponse) => {
   if (msg.type === "updateBlockList") {
-    await chrome.storage.sync.set({ blocked: msg.payload });
     await refreshRules(msg.payload);
     sendResponse({ status: "ok" });
   }

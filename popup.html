@@ -58,6 +58,29 @@
         font-size: 13px;
       }
 
+      li .controls {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      li .controls select {
+        font-family: "Anime Ace BB", sans-serif;
+        font-size: 11px;
+        padding: 4px 6px;
+        border: 2px solid black;
+        border-radius: 4px;
+        background: white;
+        box-shadow: 1px 1px 0px black;
+        cursor: pointer;
+      }
+
+      li .controls select:hover {
+        background: #f0f0f0;
+        box-shadow: 2px 2px 0px black;
+        transform: translate(-1px, -1px);
+      }
+
       li button {
         margin: 0;
         padding: 4px 8px;
@@ -199,6 +222,7 @@
       <input id="quick-add-input" type="text" placeholder="enter a quick add" />
       <button id="quick-add-btn">Add Quick-Add</button>
     </div>
+    <!-- <div class="test"></div> -->
 
     <script type="module" src="popup.js"></script>
   </body>
