@@ -1,6 +1,8 @@
 // Increment this if you ever wipe ALL rules so ids don’t collide
 const RULE_ID_START = 1000;
 
+let currentInterval = null; // To store the interval ID
+
 /**
  * Turn an array of strings (patterns) into DynamicRules (1 per string).
  * @param {string[]} patterns
@@ -63,6 +65,18 @@ async function checkExpiredUrls() {
   const { blocked: b = [] } = await chrome.storage.sync.get("blocked");
   let blocked = b.map(item => typeof item === 'string' ? { pattern: item, blockUntil: 0 } : item);
 
+  // Check if there are any URLs with expiry times
+  const hasExpiryUrls = blocked.some(item => item.blockUntil > 0);
+  
+  // If no URLs have expiry times, clear the interval
+  if (!hasExpiryUrls) {
+    if (currentInterval) {
+      clearInterval(currentInterval);
+      currentInterval = null;
+    }
+    return;
+  }
+
   const now = Date.now();
   const initialBlockedCount = blocked.length;
   blocked = blocked.filter(
@@ -85,7 +99,14 @@ async function initBackground() {
     )
     .map((item) => item.pattern);
   await refreshRules(activeBlockedPatterns);
-  setInterval(checkExpiredUrls, 60 * 1000); // Check every minute
+  
+  // Clear any existing interval
+  if (currentInterval) {
+    clearInterval(currentInterval);
+  }
+  
+  // Set new interval and store reference
+  currentInterval = setInterval(checkExpiredUrls, 60 * 1000); // Check every minute
 }
 
 /** Listen for messages from the popup to update list */
