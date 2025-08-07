@@ -116,52 +116,94 @@ function renderList() {
       return `${remainingHours}h ${remainingMinutesRemainder}m`;
     }
 
-    // Set the initial displayed value
-    const initialDisplay = formatRemainingTime(item.blockUntil);
-    const permanentOption = `<option value="0">Permanent</option>`;
-    const expiryOptions = [
-      { value: 1, label: "1 min" },
-      { value: 2, label: "2 min" },
-      { value: 15, label: "15 min" },
-      { value: 30, label: "30 min" },
-      { value: 45, label: "45 min" },
-      { value: 60, label: "1 hour" },
-      { value: 120, label: "2 hours" },
-      { value: 300, label: "5 hours" },
-    ].map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('');
+    expirySelect.innerHTML = `
+      <option value="0">Permanent</option>
+      <option value="1">1 min</option>
+      <option value="2">2 min</option>
+      <option value="15">15 min</option>
+      <option value="30">30 min</option>
+      <option value="45">45 min</option>
+      <option value="60">1 hour</option>
+      <option value="120">2 hours</option>
+      <option value="300">5 hours</option>
+    `;
 
-    expirySelect.innerHTML = permanentOption + expiryOptions;
+    // Set the selected value based on blockUntil and display remaining time
+    const initialOptionValue = item.blockUntil > 0 ? 
+      [0, 1, 2, 15, 30, 45, 60, 120, 300].reduce((prev, curr) => {
+        const prevDiff = Math.abs(item.blockUntil - (Date.now() + prev * 60 * 1000));
+        const currDiff = Math.abs(item.blockUntil - (Date.now() + curr * 60 * 1000));
+        return currDiff < prevDiff ? curr : prev;
+      }, 0).toString() : '0';
+      
+    expirySelect.value = initialOptionValue;
 
-    // Find the option that matches the initial display, or set to "Set expiry" if no match
-    let selectedOptionFound = false;
-    for (const option of expirySelect.options) {
-      if (option.textContent === initialDisplay) {
-        option.selected = true;
-        selectedOptionFound = true;
-        break;
-      }
-    }
-    if (!selectedOptionFound) {
-      expirySelect.querySelector('option[value="0"]').selected = true; // Default to "Permanent" or "Set expiry"
-    }
-
-    // Update remaining time every second
-    if (item.blockUntil > 0) {
-      const intervalId = setInterval(() => {
-        const display = formatRemainingTime(item.blockUntil);
-        if (display === "Expired") {
-          clearInterval(intervalId);
-          // Re-render the list to remove the expired item
-          renderList();
-        } else {
-          // Temporarily set the text to the remaining time
-          // This will be overwritten if the user opens the dropdown, but it's okay.
-          const currentSelectedValue = expirySelect.value; // Store current value
-          expirySelect.innerHTML = `<option value="${currentSelectedValue}">${display}</option>` + permanentOption + expiryOptions;
-          expirySelect.value = currentSelectedValue; // Restore value
+    const updateDisplay = () => {
+      const display = formatRemainingTime(item.blockUntil);
+      if (display === "Expired") {
+        clearInterval(intervalId);
+        renderList(); // Re-render to remove expired item
+      } else {
+        // Find the currently selected option and update its text content
+        const selectedOption = expirySelect.querySelector(`option[value="${expirySelect.value}"]`);
+        if (selectedOption) {
+          selectedOption.textContent = display;
         }
-      }, 1000);
+      }
+    };
+
+    // Initial display update
+    updateDisplay();
+
+    // Update remaining time every second if not permanent
+    let intervalId;
+    if (item.blockUntil > 0) {
+      intervalId = setInterval(updateDisplay, 1000);
     }
+
+    // When the dropdown is opened, reset text to its original option label
+    // and then re-apply the timer if an expiry is set
+    expirySelect.addEventListener("focus", () => {
+      const originalOption = expirySelect.querySelector(`option[value="${expirySelect.value}"]`);
+      if (originalOption) {
+        // Reset to original label for fixed durations
+        const fixedDurationOption = [
+          { value: 0, label: "Permanent" },
+          { value: 1, label: "1 min" },
+          { value: 2, label: "2 min" },
+          { value: 15, label: "15 min" },
+          { value: 30, label: "30 min" },
+          { value: 45, label: "45 min" },
+          { value: 60, label: "1 hour" },
+          { value: 120, label: "2 hours" },
+          { value: 300, label: "5 hours" },
+        ].find(opt => opt.value.toString() === expirySelect.value);
+        if (fixedDurationOption) {
+          originalOption.textContent = fixedDurationOption.label;
+        }
+      }
+      // Clear existing interval if any, and restart if expiry is set
+      if (intervalId) clearInterval(intervalId);
+    });
+
+    expirySelect.addEventListener("blur", () => {
+      // Restart the countdown when dropdown is closed
+      if (item.blockUntil > 0) {
+        intervalId = setInterval(updateDisplay, 1000);
+        updateDisplay(); // Immediate update on blur
+      }
+    });
+
+    // Also handle change event if user selects a new value
+    expirySelect.addEventListener("change", (e) => {
+      setExpiry(idx, parseInt(e.target.value));
+      // Clear existing interval if any, and restart after setting new expiry
+      if (intervalId) clearInterval(intervalId);
+      if (blocked[idx].blockUntil > 0) {
+        intervalId = setInterval(updateDisplay, 1000);
+      }
+      updateDisplay(); // Immediate update after change
+    });
 
 
     expirySelect.addEventListener("change", (e) =>
