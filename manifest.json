@@ -1,13 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Personal Site Blocker",
-  "description": "Block sites you enter by dynamically updating DNR rules.",
+  "name": "Personal Site Blocker & Redirector",
+  "description": "Block or redirect sites using dynamic declarative net request rules.",
   "version": "1.0.0",
   "permissions": ["declarativeNetRequest", "storage"],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Site Blocker"
+    "default_title": "Site Blocker & Redirector"
   },
   "icons": {
     "16": "icons/block16.png"

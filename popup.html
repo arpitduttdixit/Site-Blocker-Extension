@@ -144,6 +144,69 @@
         transform: translate(-1px, -1px);
       }
 
+      select {
+        font-family: "Anime Ace BB", sans-serif;
+        padding: 10px;
+        border: 3px solid black;
+        border-radius: 6px;
+        font-size: 13px;
+        background: white;
+        box-shadow: 2px 2px 0px black;
+        outline: none;
+        cursor: pointer;
+      }
+
+      select:focus {
+        box-shadow: 3px 3px 0px black;
+        transform: translate(-1px, -1px);
+      }
+
+      .input-group {
+        margin-bottom: 16px;
+        padding: 16px;
+        background: white;
+        border: 3px solid black;
+        border-radius: 8px;
+        box-shadow: 3px 3px 0px black;
+      }
+
+      .input-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .input-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .input-row label {
+        font-family: "Anime Ace BB", sans-serif;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 80px;
+        font-weight: bold;
+      }
+
+      .input-row input[type="text"] {
+        width: 200px;
+      }
+
+      .input-row select {
+        width: 120px;
+      }
+
+      #redirect-url-container {
+        display: none;
+      }
+
+      .add-button-row {
+        text-align: center;
+        margin-top: 16px;
+      }
+
       .quick-addons {
         display: flex;
         flex-direction: row;
@@ -202,9 +265,31 @@
     </style>
   </head>
   <body>
-    <h3>Block a site</h3>
-    <input id="url" type="text" placeholder="e.g. reddit.com" />
-    <button id="add">Add</button>
+    <h3>Block or Redirect a site</h3>
+    <div class="input-group">
+      <div class="input-row">
+        <label>URL:</label>
+        <input id="url" type="text" placeholder="e.g. reddit.com" />
+      </div>
+      <div class="input-row">
+        <label>Action:</label>
+        <select id="action-select">
+          <option value="block">Block</option>
+          <option value="redirect">Redirect</option>
+        </select>
+      </div>
+      <div class="input-row" id="redirect-url-container">
+        <label>Redirect to:</label>
+        <input
+          id="redirect-url"
+          type="text"
+          placeholder="e.g. https://example.com"
+        />
+      </div>
+      <div class="add-button-row">
+        <button id="add">Add Rule</button>
+      </div>
+    </div>
 
     <!-- Quick-Add section -->
     <div id="quick-add-wrapper" style="margin: 8px 0">
@@ -215,7 +300,7 @@
       ></div>
     </div>
 
-    <h4>Currently blocked</h4>
+    <h4>Current Rules</h4>
     <ul id="list"></ul>
 
     <div class="quick-addons">

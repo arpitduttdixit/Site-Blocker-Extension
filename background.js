@@ -4,21 +4,31 @@ const RULE_ID_START = 1000;
 // let currentInterval = null; // To store the interval ID
 
 /**
- * Turn an array of strings (patterns) into DynamicRules (1 per string).
- * @param {string[]} patterns
+ * Turn an array of rule objects into DynamicRules.
+ * @param {Array} rules - Array of objects with {pattern, action, redirectUrl}
  */
-function patternsToRules(patterns) {
-  return patterns.map((raw, idx) => {
-    const urlFilter = normalize(raw.trim());
-    return {
+function rulesToDynamicRules(rules) {
+  return rules.map((rule, idx) => {
+    const urlFilter = normalize(rule.pattern.trim());
+    const dynamicRule = {
       id: RULE_ID_START + idx,
       priority: 1,
-      action: { type: "block" },
       condition: {
         urlFilter,
         resourceTypes: ["main_frame", "sub_frame"], // covers top-level nav + iframes
       },
     };
+
+    if (rule.action === "redirect") {
+      dynamicRule.action = {
+        type: "redirect",
+        redirect: { url: rule.redirectUrl },
+      };
+    } else {
+      dynamicRule.action = { type: "block" };
+    }
+
+    return dynamicRule;
   });
 }
 
@@ -47,13 +57,13 @@ function normalize(pattern) {
 }
 
 /**
- * Replace ALL dynamic rules with rules matching given patterns.
- * @param {string[]} patterns
+ * Replace ALL dynamic rules with rules matching given rule objects.
+ * @param {Array} rules - Array of objects with {pattern, action, redirectUrl}
  */
-async function refreshRules(patterns) {
+async function refreshRules(rules) {
   const allRules = await chrome.declarativeNetRequest.getDynamicRules();
   const removeIds = allRules.map((r) => r.id);
-  const addRules = patternsToRules(patterns);
+  const addRules = rulesToDynamicRules(rules);
   await chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: removeIds,
     addRules,
@@ -63,9 +73,17 @@ async function refreshRules(patterns) {
 // Function to check and remove expired URLs
 async function checkExpiredUrls() {
   const { blocked: b = [] } = await chrome.storage.sync.get("blocked");
-  let blocked = b.map((item) =>
-    typeof item === "string" ? { pattern: item, blockUntil: 0 } : item
-  );
+  let blocked = b.map((item) => {
+    if (typeof item === "string") {
+      return { pattern: item, blockUntil: 0, action: "block", redirectUrl: "" };
+    }
+    return {
+      pattern: item.pattern,
+      blockUntil: item.blockUntil || 0,
+      action: item.action || "block",
+      redirectUrl: item.redirectUrl || "",
+    };
+  });
 
   const now = Date.now();
   const initialBlockedCount = blocked.length;
@@ -75,20 +93,31 @@ async function checkExpiredUrls() {
 
   if (blocked.length < initialBlockedCount) {
     await chrome.storage.sync.set({ blocked });
-    await refreshRules(blocked.map((item) => item.pattern));
+    await refreshRules(blocked);
   }
 }
 
 async function initBackground() {
   const { blocked = [] } = await chrome.storage.sync.get("blocked");
-  const activeBlockedPatterns = blocked
-    .filter(
-      (item) =>
-        typeof item === "object" &&
-        (item.blockUntil === 0 || item.blockUntil > Date.now())
-    )
-    .map((item) => item.pattern);
-  await refreshRules(activeBlockedPatterns);
+  const activeRules = blocked
+    .map((item) => {
+      if (typeof item === "string") {
+        return {
+          pattern: item,
+          blockUntil: 0,
+          action: "block",
+          redirectUrl: "",
+        };
+      }
+      return {
+        pattern: item.pattern,
+        blockUntil: item.blockUntil || 0,
+        action: item.action || "block",
+        redirectUrl: item.redirectUrl || "",
+      };
+    })
+    .filter((item) => item.blockUntil === 0 || item.blockUntil > Date.now());
+  await refreshRules(activeRules);
 
   setInterval(checkExpiredUrls, 60 * 1000); // Check every minute
 }
