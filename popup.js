@@ -12,6 +12,9 @@ const builtinQuickAdds = [
  * 2. DOM handles         *
  **************************/
 const urlInput = document.getElementById("url");
+const actionSelect = document.getElementById("action-select");
+const redirectUrlInput = document.getElementById("redirect-url");
+const redirectUrlContainer = document.getElementById("redirect-url-container");
 const addBtn = document.getElementById("add");
 const listUl = document.getElementById("list");
 const quickAddDiv = document.getElementById("quick-adds");
@@ -21,7 +24,7 @@ const quickAddBtn = document.getElementById("quick-add-btn");
 /**************************
  * 3. State               *
  **************************/
-let blocked = []; // current block list, now stores objects {pattern, blockUntil}
+let blocked = []; // current block list, now stores objects {pattern, blockUntil, action, redirectUrl}
 let userAdds = []; // user-defined quick-adds (label+pattern)
 
 /**************************
@@ -32,20 +35,32 @@ async function init() {
     "blocked",
     "quickAdds",
   ]);
-  // Ensure blocked items are objects with pattern and blockUntil,
+  // Ensure blocked items are objects with pattern, blockUntil, action, and redirectUrl,
   // and filter out any expired items if the extension was closed
   blocked = b
-    .map((item) =>
-      typeof item === "string" ? { pattern: item, blockUntil: 0 } : item
-    )
+    .map((item) => {
+      if (typeof item === "string") {
+        return {
+          pattern: item,
+          blockUntil: 0,
+          action: "block",
+          redirectUrl: "",
+        };
+      }
+      // Ensure existing objects have the new properties
+      return {
+        pattern: item.pattern,
+        blockUntil: item.blockUntil || 0,
+        action: item.action || "block",
+        redirectUrl: item.redirectUrl || "",
+      };
+    })
     .filter((item) => item.blockUntil === 0 || item.blockUntil > Date.now());
 
   userAdds = quickAdds;
   renderQuickAdds();
   renderList();
 }
-
-
 
 /**************************
  * 5. Rendering helpers   *
@@ -56,7 +71,7 @@ function renderQuickAdds() {
     const btn = document.createElement("button");
     btn.textContent = qa.label;
     btn.className = "qa-btn";
-    btn.addEventListener("click", () => addPattern(qa.pattern));
+    btn.addEventListener("click", () => addPattern(qa.pattern, "block", ""));
     quickAddDiv.appendChild(btn);
 
     // allow deletion only for user-added shortcuts
@@ -77,7 +92,32 @@ function renderList() {
   listUl.innerHTML = "";
   blocked.forEach((item, idx) => {
     const li = document.createElement("li");
-    li.textContent = item.pattern; // Display the pattern
+
+    // Create pattern display with action type
+    const patternDiv = document.createElement("div");
+    patternDiv.style.flex = "1";
+
+    const patternText = document.createElement("div");
+    patternText.textContent = item.pattern;
+    patternText.style.fontWeight = "bold";
+
+    const actionText = document.createElement("div");
+    actionText.style.fontSize = "11px";
+    actionText.style.color = "#666";
+    actionText.style.textTransform = "uppercase";
+    actionText.style.marginTop = "4px";
+
+    if (item.action === "redirect") {
+      actionText.innerHTML = `<strong>REDIRECT</strong> → ${item.redirectUrl}`;
+      actionText.style.color = "#cc0000";
+    } else {
+      actionText.innerHTML = "<strong>BLOCK</strong>";
+      actionText.style.color = "#cc0000";
+    }
+
+    patternDiv.appendChild(patternText);
+    patternDiv.appendChild(actionText);
+    li.appendChild(patternDiv);
 
     const controlsDiv = document.createElement("div");
     controlsDiv.className = "controls";
@@ -129,13 +169,21 @@ function renderList() {
     `;
 
     // Set the selected value based on blockUntil and display remaining time
-    const initialOptionValue = item.blockUntil > 0 ? 
-      [0, 1, 2, 15, 30, 45, 60, 120, 300].reduce((prev, curr) => {
-        const prevDiff = Math.abs(item.blockUntil - (Date.now() + prev * 60 * 1000));
-        const currDiff = Math.abs(item.blockUntil - (Date.now() + curr * 60 * 1000));
-        return currDiff < prevDiff ? curr : prev;
-      }, 0).toString() : '0';
-      
+    const initialOptionValue =
+      item.blockUntil > 0
+        ? [0, 1, 2, 15, 30, 45, 60, 120, 300]
+            .reduce((prev, curr) => {
+              const prevDiff = Math.abs(
+                item.blockUntil - (Date.now() + prev * 60 * 1000)
+              );
+              const currDiff = Math.abs(
+                item.blockUntil - (Date.now() + curr * 60 * 1000)
+              );
+              return currDiff < prevDiff ? curr : prev;
+            }, 0)
+            .toString()
+        : "0";
+
     expirySelect.value = initialOptionValue;
 
     const updateDisplay = () => {
@@ -145,7 +193,9 @@ function renderList() {
         renderList(); // Re-render to remove expired item
       } else {
         // Find the currently selected option and update its text content
-        const selectedOption = expirySelect.querySelector(`option[value="${expirySelect.value}"]`);
+        const selectedOption = expirySelect.querySelector(
+          `option[value="${expirySelect.value}"]`
+        );
         if (selectedOption) {
           selectedOption.textContent = display;
         }
@@ -164,7 +214,9 @@ function renderList() {
     // When the dropdown is opened, reset text to its original option label
     // and then re-apply the timer if an expiry is set
     expirySelect.addEventListener("focus", () => {
-      const originalOption = expirySelect.querySelector(`option[value="${expirySelect.value}"]`);
+      const originalOption = expirySelect.querySelector(
+        `option[value="${expirySelect.value}"]`
+      );
       if (originalOption) {
         // Reset to original label for fixed durations
         const fixedDurationOption = [
@@ -177,7 +229,7 @@ function renderList() {
           { value: 60, label: "1 hour" },
           { value: 120, label: "2 hours" },
           { value: 300, label: "5 hours" },
-        ].find(opt => opt.value.toString() === expirySelect.value);
+        ].find((opt) => opt.value.toString() === expirySelect.value);
         if (fixedDurationOption) {
           originalOption.textContent = fixedDurationOption.label;
         }
@@ -205,7 +257,6 @@ function renderList() {
       updateDisplay(); // Immediate update after change
     });
 
-
     expirySelect.addEventListener("change", (e) =>
       setExpiry(idx, parseInt(e.target.value))
     );
@@ -224,16 +275,68 @@ function renderList() {
 /**************************
  * 6. Block-list actions  *
  **************************/
-async function addPattern(raw) {
+async function addPattern(raw, action = null, redirectUrl = null) {
   const pattern = (raw ?? urlInput.value).trim();
-  if (!pattern) return;
-  if (blocked.some((item) => item.pattern === pattern)) {
-    alert("Already blocked.");
+  const selectedAction = action ?? actionSelect.value;
+  let selectedRedirectUrl = redirectUrl ?? redirectUrlInput.value.trim();
+
+  if (!pattern) {
+    alert("URL pattern is required.");
     return;
   }
+
+  if (blocked.some((item) => item.pattern === pattern)) {
+    alert("This URL pattern already exists in the list.");
+    return;
+  }
+
+  // Validate redirect URL if action is redirect
+  if (selectedAction === "redirect") {
+    console.log("Validating redirect URL:", selectedRedirectUrl);
+
+    if (!selectedRedirectUrl) {
+      alert("Redirect URL is required for redirect action.");
+      return;
+    }
+
+    // Simple validation - just check it's not empty and normalize it
+    let validatedRedirectUrl = selectedRedirectUrl;
+
+    // Add protocol if missing and it looks like a domain
+    if (
+      !selectedRedirectUrl.startsWith("http://") &&
+      !selectedRedirectUrl.startsWith("https://")
+    ) {
+      console.log("Adding https:// to redirect URL");
+      // If it contains a dot or is a simple word, treat as domain and add https://
+      if (
+        selectedRedirectUrl.includes(".") ||
+        !selectedRedirectUrl.includes("/")
+      ) {
+        validatedRedirectUrl = "https://" + selectedRedirectUrl;
+      } else {
+        // If it starts with / or contains /, assume it's a path and add https://
+        validatedRedirectUrl = "https://" + selectedRedirectUrl;
+      }
+    }
+
+    selectedRedirectUrl = validatedRedirectUrl;
+  }
+
   // Add new pattern with no expiry by default
-  blocked.push({ pattern: pattern, blockUntil: 0 });
+  blocked.push({
+    pattern: pattern,
+    blockUntil: 0,
+    action: selectedAction,
+    redirectUrl: selectedAction === "redirect" ? selectedRedirectUrl : "",
+  });
+
+  // Clear inputs
   urlInput.value = "";
+  redirectUrlInput.value = "";
+  actionSelect.value = "block";
+  redirectUrlContainer.style.display = "none";
+
   await pushUpdate();
 }
 
@@ -270,14 +373,16 @@ async function setExpiry(idx, durationInMinutes) {
 }
 
 async function pushUpdate() {
+  const activeRules = blocked.filter(
+    (item) => item.blockUntil === 0 || item.blockUntil > Date.now()
+  );
+
   await chrome.runtime.sendMessage({
     type: "updateBlockList",
-    // Send only patterns to background.js for rule creation
-    payload: blocked
-      .filter((item) => item.blockUntil === 0 || item.blockUntil > Date.now())
-      .map((item) => item.pattern),
+    // Send full rule objects to background.js for rule creation
+    payload: activeRules,
   });
-  console.log("Block list updated:", blocked);
+  console.log("Rules updated:", blocked);
   await chrome.storage.sync.set({ blocked });
   renderList();
 }
@@ -300,9 +405,33 @@ async function removeUserQuickAdd(i) {
 /**************************
  * 8. Event wiring        *
  **************************/
-addBtn.addEventListener("click", () => addPattern());
+// Handle action selection change
+actionSelect.addEventListener("change", () => {
+  if (actionSelect.value === "redirect") {
+    redirectUrlContainer.style.display = "flex";
+  } else {
+    redirectUrlContainer.style.display = "none";
+    redirectUrlInput.value = "";
+  }
+});
+
+// Handle add button click
+addBtn.addEventListener("click", () => {
+  addPattern();
+});
+
+// Handle enter key in URL input
 urlInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") addPattern();
+  if (e.key === "Enter") {
+    addPattern();
+  }
+});
+
+// Handle enter key in redirect URL input
+redirectUrlInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    addPattern();
+  }
 });
 
 quickAddBtn.addEventListener("click", () => addQuickAdd());
