@@ -295,6 +295,31 @@
         <button id="add">Add Rule</button>
       </div>
     </div>
+    <h3>Block or Redirect a site</h3>
+    <div class="input-group">
+      <div class="input-row">
+        <label>URL:</label>
+        <input id="url" type="text" placeholder="e.g. reddit.com" />
+      </div>
+      <div class="input-row">
+        <label>Action:</label>
+        <select id="action-select">
+          <option value="block">Block</option>
+          <option value="redirect">Redirect</option>
+        </select>
+      </div>
+      <div class="input-row" id="redirect-url-container">
+        <label>Redirect to:</label>
+        <input
+          id="redirect-url"
+          type="text"
+          placeholder="e.g. https://example.com"
+        />
+      </div>
+      <div class="add-button-row">
+        <button id="add">Add Rule</button>
+      </div>
+    </div>
 
     <!-- Quick-Add section -->
     <div id="quick-add-wrapper" style="margin: 8px 0">
