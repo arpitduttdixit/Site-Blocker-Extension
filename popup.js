@@ -65,8 +65,11 @@ const urlInput = document.getElementById("url");
 const actionSelect = document.getElementById("action-select");
 const redirectUrlInput = document.getElementById("redirect-url");
 const redirectUrlContainer = document.getElementById("redirect-url-container");
+<<<<<<< HEAD
 const productiveUrlsBtn = document.getElementById("productive-urls-btn");
 
+=======
+>>>>>>> main
 const addBtn = document.getElementById("add");
 const listUl = document.getElementById("list");
 const quickAddDiv = document.getElementById("quick-adds");
@@ -76,7 +79,7 @@ const quickAddBtn = document.getElementById("quick-add-btn");
 /**************************
  * 3. State               *
  **************************/
-let blocked = []; // current block list, now stores objects {pattern, blockUntil}
+let blocked = []; // current block list, now stores objects {pattern, blockUntil, action, redirectUrl}
 let userAdds = []; // user-defined quick-adds (label+pattern)
 
 /**************************
@@ -160,6 +163,7 @@ function renderList() {
     actionText.style.marginTop = "4px";
 
     if (item.action === "redirect") {
+<<<<<<< HEAD
       // Truncate long URLs to prevent layout overflow
       const truncatedUrl =
         item.redirectUrl.length > 25
@@ -168,6 +172,10 @@ function renderList() {
       actionText.innerHTML = `<strong>REDIRECT</strong> → ${truncatedUrl}`;
       actionText.style.color = "#0066cc";
       actionText.title = item.redirectUrl; // Show full URL on hover
+=======
+      actionText.innerHTML = `<strong>REDIRECT</strong> → ${item.redirectUrl}`;
+      actionText.style.color = "#cc0000";
+>>>>>>> main
     } else {
       actionText.innerHTML = "<strong>BLOCK</strong>";
       actionText.style.color = "#cc0000";
@@ -350,10 +358,19 @@ async function addPattern(raw, action = null, redirectUrl = null) {
 
   // Validate redirect URL if action is redirect
   if (selectedAction === "redirect") {
+<<<<<<< HEAD
+=======
+    console.log("Validating redirect URL:", selectedRedirectUrl);
+
+>>>>>>> main
     if (!selectedRedirectUrl) {
       alert("Redirect URL is required for redirect action.");
       return;
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
     // Simple validation - just check it's not empty and normalize it
     let validatedRedirectUrl = selectedRedirectUrl;
 
@@ -362,6 +379,10 @@ async function addPattern(raw, action = null, redirectUrl = null) {
       !selectedRedirectUrl.startsWith("http://") &&
       !selectedRedirectUrl.startsWith("https://")
     ) {
+<<<<<<< HEAD
+=======
+      console.log("Adding https:// to redirect URL");
+>>>>>>> main
       // If it contains a dot or is a simple word, treat as domain and add https://
       if (
         selectedRedirectUrl.includes(".") ||
@@ -390,7 +411,10 @@ async function addPattern(raw, action = null, redirectUrl = null) {
   redirectUrlInput.value = "";
   actionSelect.value = "block";
   redirectUrlContainer.style.display = "none";
+<<<<<<< HEAD
   productiveUrlsBtn.style.display = "none";
+=======
+>>>>>>> main
 
   await pushUpdate();
 }
@@ -464,6 +488,7 @@ async function removeUserQuickAdd(i) {
 actionSelect.addEventListener("change", () => {
   if (actionSelect.value === "redirect") {
     redirectUrlContainer.style.display = "flex";
+<<<<<<< HEAD
     productiveUrlsBtn.style.display = "inline-block";
   } else {
     redirectUrlContainer.style.display = "none";
@@ -488,9 +513,31 @@ productiveUrlsBtn.addEventListener("click", () => {
 // Handle add button click
 addBtn.addEventListener("click", () => addPattern());
 
+=======
+  } else {
+    redirectUrlContainer.style.display = "none";
+    redirectUrlInput.value = "";
+  }
+});
+
+// Handle add button click
+addBtn.addEventListener("click", () => {
+  addPattern();
+});
+
+>>>>>>> main
 // Handle enter key in URL input
 urlInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") addPattern();
+  if (e.key === "Enter") {
+    addPattern();
+  }
+});
+
+// Handle enter key in redirect URL input
+redirectUrlInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    addPattern();
+  }
 });
 
 // Handle enter key in redirect URL input
