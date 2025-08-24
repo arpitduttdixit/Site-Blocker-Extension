@@ -9,12 +9,67 @@ const builtinQuickAdds = [
 ];
 
 /**************************
+ * 1b. Productive URLs    *
+ **************************/
+const productiveUrls = [
+  {
+    label: "Motivational Quote 1",
+    url: "https://i.pinimg.com/736x/b3/5c/4e/b35c4e9f29c4de13254bcf7b2a9f8c1e.jpg",
+  },
+  {
+    label: "Study Tips",
+    url: "https://i.pinimg.com/736x/fe/47/10/fe471063853233846efdebd8b203715e.jpg",
+  },
+  {
+    label: "Productivity Quote",
+    url: "https://i.pinimg.com/736x/cd/bf/da/cdbfda3fd32e9852adb21b1b3c063af9.jpg",
+  },
+  {
+    label: "Success Mindset",
+    url: "https://i.pinimg.com/1200x/18/0b/ab/180babca3da124d26e553878f34e15f3.jpg",
+  },
+  {
+    label: "Focus Quote",
+    url: "https://i.pinimg.com/736x/05/af/7a/05af7aff69e4c59d01b1c355f24d7f0a.jpg",
+  },
+  {
+    label: "Goal Setting",
+    url: "https://i.pinimg.com/736x/11/b1/eb/11b1eb945c94092498d92231772a3da7.jpg",
+  },
+  {
+    label: "Time Management",
+    url: "https://i.pinimg.com/1200x/a2/b9/61/a2b9613ac07d6c04001e6ef539a047e5.jpg",
+  },
+  {
+    label: "Self Improvement",
+    url: "https://i.pinimg.com/736x/c6/b9/79/c6b979e254461b7faf0f1d0694096b0d.jpg",
+  },
+  {
+    label: "Discipline Quote",
+    url: "https://i.pinimg.com/1200x/96/88/95/96889550725bef51aaa7bc0371ca199f.jpg",
+  },
+  {
+    label: "Growth Mindset",
+    url: "https://i.pinimg.com/736x/0c/a5/ca/0ca5ca4c6e2703c233b3e3d816ae6389.jpg",
+  },
+  {
+    label: "Success Habits",
+    url: "https://i.pinimg.com/1200x/dc/c5/96/dcc5963e5973a438aaf5ac2eb77ba3cc.jpg",
+  },
+];
+
+/**************************
  * 2. DOM handles         *
  **************************/
 const urlInput = document.getElementById("url");
 const actionSelect = document.getElementById("action-select");
 const redirectUrlInput = document.getElementById("redirect-url");
 const redirectUrlContainer = document.getElementById("redirect-url-container");
+<<<<<<< HEAD
+const productiveUrlsBtn = document.getElementById("productive-urls-btn");
+
+=======
+>>>>>>> main
 const addBtn = document.getElementById("add");
 const listUl = document.getElementById("list");
 const quickAddDiv = document.getElementById("quick-adds");
@@ -108,8 +163,19 @@ function renderList() {
     actionText.style.marginTop = "4px";
 
     if (item.action === "redirect") {
+<<<<<<< HEAD
+      // Truncate long URLs to prevent layout overflow
+      const truncatedUrl =
+        item.redirectUrl.length > 25
+          ? item.redirectUrl.substring(0, 22) + "..."
+          : item.redirectUrl;
+      actionText.innerHTML = `<strong>REDIRECT</strong> → ${truncatedUrl}`;
+      actionText.style.color = "#0066cc";
+      actionText.title = item.redirectUrl; // Show full URL on hover
+=======
       actionText.innerHTML = `<strong>REDIRECT</strong> → ${item.redirectUrl}`;
       actionText.style.color = "#cc0000";
+>>>>>>> main
     } else {
       actionText.innerHTML = "<strong>BLOCK</strong>";
       actionText.style.color = "#cc0000";
@@ -292,13 +358,19 @@ async function addPattern(raw, action = null, redirectUrl = null) {
 
   // Validate redirect URL if action is redirect
   if (selectedAction === "redirect") {
+<<<<<<< HEAD
+=======
     console.log("Validating redirect URL:", selectedRedirectUrl);
 
+>>>>>>> main
     if (!selectedRedirectUrl) {
       alert("Redirect URL is required for redirect action.");
       return;
     }
+<<<<<<< HEAD
+=======
 
+>>>>>>> main
     // Simple validation - just check it's not empty and normalize it
     let validatedRedirectUrl = selectedRedirectUrl;
 
@@ -307,7 +379,10 @@ async function addPattern(raw, action = null, redirectUrl = null) {
       !selectedRedirectUrl.startsWith("http://") &&
       !selectedRedirectUrl.startsWith("https://")
     ) {
+<<<<<<< HEAD
+=======
       console.log("Adding https:// to redirect URL");
+>>>>>>> main
       // If it contains a dot or is a simple word, treat as domain and add https://
       if (
         selectedRedirectUrl.includes(".") ||
@@ -336,6 +411,10 @@ async function addPattern(raw, action = null, redirectUrl = null) {
   redirectUrlInput.value = "";
   actionSelect.value = "block";
   redirectUrlContainer.style.display = "none";
+<<<<<<< HEAD
+  productiveUrlsBtn.style.display = "none";
+=======
+>>>>>>> main
 
   await pushUpdate();
 }
@@ -409,6 +488,32 @@ async function removeUserQuickAdd(i) {
 actionSelect.addEventListener("change", () => {
   if (actionSelect.value === "redirect") {
     redirectUrlContainer.style.display = "flex";
+<<<<<<< HEAD
+    productiveUrlsBtn.style.display = "inline-block";
+  } else {
+    redirectUrlContainer.style.display = "none";
+    redirectUrlInput.value = "";
+    productiveUrlsBtn.style.display = "none";
+  }
+});
+
+// Handle productive URLs button click - randomly select a productive URL
+productiveUrlsBtn.addEventListener("click", () => {
+  const randomIndex = Math.floor(Math.random() * productiveUrls.length);
+  const randomUrl = productiveUrls[randomIndex];
+  redirectUrlInput.value = randomUrl.url;
+
+  // Optional: Show a brief visual feedback
+  productiveUrlsBtn.textContent = "✓";
+  setTimeout(() => {
+    productiveUrlsBtn.textContent = "**";
+  }, 1000);
+});
+
+// Handle add button click
+addBtn.addEventListener("click", () => addPattern());
+
+=======
   } else {
     redirectUrlContainer.style.display = "none";
     redirectUrlInput.value = "";
@@ -420,6 +525,7 @@ addBtn.addEventListener("click", () => {
   addPattern();
 });
 
+>>>>>>> main
 // Handle enter key in URL input
 urlInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
@@ -432,6 +538,11 @@ redirectUrlInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     addPattern();
   }
+});
+
+// Handle enter key in redirect URL input
+redirectUrlInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") addPattern();
 });
 
 quickAddBtn.addEventListener("click", () => addQuickAdd());

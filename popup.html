@@ -206,10 +206,39 @@
       .add-button-row {
         text-align: center;
         margin-top: 16px;
+      }
 
-        #add {
-          width: 142px;
-        }
+      #add {
+        width: 142px;
+        margin-left: 54px;
+      }
+
+      #productive-urls-btn {
+        font-family: "Anime Ace BB", sans-serif;
+        padding: 8px 12px;
+        border: 2px solid black;
+        border-radius: 4px;
+        background: #ffeb3b;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+        box-shadow: 2px 2px 0px black;
+        transition: all 0.1s ease;
+        margin: 0;
+        min-width: 40px;
+        margin-left: 8px;
+        display: none;
+      }
+
+      #productive-urls-btn:hover {
+        background: #fff176;
+        box-shadow: 3px 3px 0px black;
+        transform: translate(-1px, -1px);
+      }
+
+      #productive-urls-btn:active {
+        box-shadow: 1px 1px 0px black;
+        transform: translate(1px, 1px);
       }
 
       .quick-addons {
@@ -285,14 +314,24 @@
       </div>
       <div class="input-row" id="redirect-url-container">
         <label>Redirect to:</label>
-        <input
-          id="redirect-url"
-          type="text"
-          placeholder="e.g. https://example.com"
-        />
+        <div style="display: flex; gap: 4px; align-items: center">
+          <input
+            id="redirect-url"
+            type="text"
+            placeholder="e.g. https://example.com"
+          />
+        </div>
       </div>
+
       <div class="add-button-row">
         <button id="add">Add Rule</button>
+        <button
+          type="button"
+          id="productive-urls-btn"
+          title="Choose from productive URLs"
+        >
+          **
+        </button>
       </div>
     </div>
     <h3>Block or Redirect a site</h3>
