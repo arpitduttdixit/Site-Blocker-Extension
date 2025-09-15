@@ -166,6 +166,7 @@ function renderList() {
       <option value="60">1 hour</option>
       <option value="120">2 hours</option>
       <option value="300">5 hours</option>
+      <option value="300">10 hours</option>
     `;
 
     // Set the selected value based on blockUntil and display remaining time
