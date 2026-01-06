@@ -3,7 +3,7 @@
   "name": "Personal Site Blocker",
   "description": "Block sites you enter by dynamically updating DNR rules.",
   "version": "1.0.0",
-  "permissions": ["declarativeNetRequest", "storage"],
+  "permissions": ["declarativeNetRequest", "storage", "tabs"],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup.html",

@@ -1,35 +1,36 @@
 // Increment this if you ever wipe ALL rules so ids don’t collide
 const RULE_ID_START = 1000;
-
-// let currentInterval = null; // To store the interval ID
+let closePatterns = [];
 
 /**
  * Turn an array of rule objects into DynamicRules.
  * @param {Array} rules - Array of objects with {pattern, action, redirectUrl}
  */
 function rulesToDynamicRules(rules) {
-  return rules.map((rule, idx) => {
-    const urlFilter = normalize(rule.pattern.trim());
-    const dynamicRule = {
-      id: RULE_ID_START + idx,
-      priority: 1,
-      condition: {
-        urlFilter,
-        resourceTypes: ["main_frame", "sub_frame"], // covers top-level nav + iframes
-      },
-    };
-
-    if (rule.action === "redirect") {
-      dynamicRule.action = {
-        type: "redirect",
-        redirect: { url: rule.redirectUrl },
+  return rules
+    .filter((rule) => rule.action !== "close")
+    .map((rule, idx) => {
+      const urlFilter = normalize(rule.pattern.trim());
+      const dynamicRule = {
+        id: RULE_ID_START + idx,
+        priority: 1,
+        condition: {
+          urlFilter,
+          resourceTypes: ["main_frame", "sub_frame"],
+        },
       };
-    } else {
-      dynamicRule.action = { type: "block" };
-    }
 
-    return dynamicRule;
-  });
+      if (rule.action === "redirect") {
+        dynamicRule.action = {
+          type: "redirect",
+          redirect: { url: rule.redirectUrl },
+        };
+      } else {
+        dynamicRule.action = { type: "block" };
+      }
+
+      return dynamicRule;
+    });
 }
 
 /** Load list from storage, build rules on startup */
@@ -61,6 +62,10 @@ function normalize(pattern) {
  * @param {Array} rules - Array of objects with {pattern, action, redirectUrl}
  */
 async function refreshRules(rules) {
+  closePatterns = rules
+    .filter((rule) => rule.action === "close")
+    .map((rule) => new RegExp(normalize(rule.pattern).replace(/\*/g, ".*")));
+
   const allRules = await chrome.declarativeNetRequest.getDynamicRules();
   const removeIds = allRules.map((r) => r.id);
   const addRules = rulesToDynamicRules(rules);
@@ -130,4 +135,15 @@ chrome.runtime.onMessage.addListener(async (msg, _sender, sendResponse) => {
   }
   // keep message channel open
   return true;
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.url) {
+    for (const pattern of closePatterns) {
+      if (pattern.test(changeInfo.url)) {
+        chrome.tabs.remove(tabId);
+        break;
+      }
+    }
+  }
 });

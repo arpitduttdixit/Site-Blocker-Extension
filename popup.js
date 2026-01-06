@@ -168,6 +168,9 @@ function renderList() {
       actionText.innerHTML = `<strong>REDIRECT</strong> → ${truncatedUrl}`;
       actionText.style.color = "#0066cc";
       actionText.title = item.redirectUrl; // Show full URL on hover
+    } else if (item.action === "close") {
+      actionText.innerHTML = "<strong>CLOSE</strong>";
+      actionText.style.color = "#ff9800";
     } else {
       actionText.innerHTML = "<strong>BLOCK</strong>";
       actionText.style.color = "#cc0000";
